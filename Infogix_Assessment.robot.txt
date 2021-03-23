@@ -1,0 +1,123 @@
+*** Settings ***
+Library  ExtendedSelenium2Library
+Test teardown    Close all browsers
+
+
+*** Variables ***
+${BROWSER}  chrome
+${LOGIN URL}  https://github.com/
+${SIGNIN_LOCATOR}  //a[@class="HeaderMenu-link flex-shrink-0 no-underline mr-3"]
+${SIGNIN_PAGE_TEXT}  Sign in to GitHub
+${USERNAME_TEXT}  Username or email address
+${PASSWORD_TEXT}  Password
+${SIGNIN_BUTTON_LOCATOR}  //input[@value="Sign in"]
+${MANDATORY_PARAMETERS_TEXT}  Incorrect username or password.
+${USERNAME_LOCATOR}  //input[@id="login_field"]
+${USER_ID}  Piyush-Malhotra
+${Password}  Piyush
+${PASSWORD_LOCATOR}  //input[@id="password"]
+${FORGOT_PASSWORD_LOCATOR}  //a[contains(text(),"Forgot password?")]
+${IMPROPER_EMAILID}  m.ie
+${EMAIL_LOCATOR}  //input[@id="email_field"]
+${INVALID_EMAIL_MESSAGE}  Can't find that email, sorry.
+${SEND_EMAIL_BUTTON_LOCATOR}  //input[@value="Send password reset email"]
+${SIGNUP_LOCATOR}  //a[@class="HeaderMenu-link flex-shrink-0 d-inline-block no-underline border color-border-tertiary rounded px-2 py-1 js-signup-redesign-target js-signup-redesign-control"]
+${USERNAME_TEXT_SIGNUP}  Username
+${EMAIL_TEXT}  Email address
+${CREATE_ACCOUNT_TEXT}  Create your account
+${CREATE_PERSONAL_ACCOUNT_TEXT}  Create your personal account
+${EXISTING_EMAIL_LOCATOR}  //input[@id="user_login"]  
+${EXISTING_EMAIL}  piyush.malhotra2510@gmail.com
+${CREATE_ACCOUNT_LOCATOR}  //div/button[contains(text(),"Create account")]
+
+
+*** Keywords ***
+
+chromeurl
+    [Arguments]  ${LOGIN URL}
+    Open Browser  ${LOGIN URL}  ${BROWSER}
+    maximize browser window
+    Set Selenium Speed    0
+    wait until angular ready
+
+Open URL
+    Run Keyword If  "chrome" in """${BROWSER}"""  chromeurl  ${LOGIN URL}
+
+
+Open SIGN-IN Page
+    Open URL
+    Click Element  Xpath=${SIGNIN_LOCATOR}
+
+
+
+
+
+
+
+
+*** Test Cases ***
+Verify Login Page   
+    Open SIGN-IN Page    
+    Page should contain  ${SIGNIN_PAGE_TEXT}
+    Page should contain  ${USERNAME_TEXT}
+    Page should contain  ${PASSWORD_TEXT}
+
+
+
+
+Verify that username and password are mandatory on login page
+    Open SIGN-IN Page
+    Click Button    Xpath=${SIGNIN_BUTTON_LOCATOR}
+    Page should contain    ${MANDATORY_PARAMETERS_TEXT}
+    Input Text    ${USERNAME_LOCATOR}    ${USER_ID}
+    Click Button    Xpath=${SIGNIN_BUTTON_LOCATOR}
+    Page should contain    ${MANDATORY_PARAMETERS_TEXT}
+    Input Text    ${PASSWORD_LOCATOR}    ${Password}
+    Click Button    Xpath=${SIGNIN_BUTTON_LOCATOR}
+    Page should contain    ${MANDATORY_PARAMETERS_TEXT}
+
+
+
+
+
+Verify that inserting m.ie into email field in reset_password page displays message
+    Open SIGN-IN Page
+    Click Element  Xpath=${FORGOT_PASSWORD_LOCATOR}
+    Input Text    Xpath=${EMAIL_LOCATOR}    ${IMPROPER_EMAILID} 
+    Page should contain    ${INVALID_EMAIL_MESSAGE}
+
+
+
+
+
+Verify that inserting empty value into email field in reset_password page displays message and first word is can't
+    Open SIGN-IN Page
+    Click Element  Xpath=${FORGOT_PASSWORD_LOCATOR}
+    Click Button    Xpath=${SEND_EMAIL_BUTTON_LOCATOR}
+    Page should contain    ${INVALID_EMAIL_MESSAGE}
+
+
+
+Verify that clicking on "Sign up" button will redirect user into "join github" page
+    Open URL
+    Click Button    Xpath=${SIGNUP_LOCATOR}
+    Page should contain    ${USERNAME_TEXT_SIGNUP}
+    Page should contain    ${PASSWORD_TEXT}
+    Page should contain    ${EMAIL_TEXT}
+    Page should contain    ${CREATE_ACCOUNT_TEXT}
+
+
+
+
+
+Verify that "join github" page contains text "Create your personal account"
+    Open URL
+    Page should contain    ${CREATE_ACCOUNT_TEXT}
+
+
+
+Verify that "Create an account" button is greyed when an existing email address is inserted in "join github" page.
+    Open URL
+    Click Button    Xpath=${SIGNUP_LOCATOR}
+    Input text    Xpath=${EXISTING_EMAIL_LOCATOR}    ${EXISTING_EMAIL}
+    Element Should Be Disabled    Xpath=${CREATE_ACCOUNT_LOCATOR}
